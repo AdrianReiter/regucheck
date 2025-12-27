@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import FileUpload from '@/components/FileUpload';
 import ChatInterface, { Message } from '@/components/ChatInterface';
+import AgentDashboard from '@/components/AgentDashboard';
 import { ShieldCheck, Settings } from 'lucide-react';
 import { STANDARDS } from '@/lib/standards';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -12,6 +14,7 @@ export default function Home() {
   const [isDocumentReady, setIsDocumentReady] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [selectedStandard, setSelectedStandard] = useState(STANDARDS[0].id);
+  const [activeTab, setActiveTab] = useState<'chat' | 'agents'>('chat');
 
   const generateSummary = async (fileName: string) => {
     setIsLoading(true);
@@ -132,6 +135,27 @@ Include:
     }
   };
 
+  const handleRunAgent = async (agentId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: "Run analysis", 
+          agentId: agentId, 
+          standard: selectedStandard
+        })
+      });
+      const data = await response.json();
+      return data.reply; 
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 pb-12">
       {/* Header */}
@@ -197,6 +221,7 @@ Include:
                     setIsDocumentReady(false);
                     setUploadedFileName(null);
                     setMessages([]);
+                    setActiveTab('chat');
                   }}
                   className="w-full mt-6 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -205,11 +230,30 @@ Include:
               </div>
             </div>
             <div className="lg:col-span-3">
-              <ChatInterface
-                messages={messages}
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
-              />
+              <div className="flex space-x-2 mb-4 bg-gray-100 p-1 rounded-lg w-fit">
+                <button 
+                  onClick={() => setActiveTab('chat')}
+                  className={cn("px-4 py-2 rounded-md font-medium text-sm transition-all", activeTab === 'chat' ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900")}
+                >
+                  Chat Assistant
+                </button>
+                <button 
+                  onClick={() => setActiveTab('agents')}
+                  className={cn("px-4 py-2 rounded-md font-medium text-sm transition-all", activeTab === 'agents' ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900")}
+                >
+                  AI Agents
+                </button>
+              </div>
+
+              {activeTab === 'chat' ? (
+                <ChatInterface
+                  messages={messages}
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <AgentDashboard onRunAgent={handleRunAgent} isLoading={isLoading} />
+              )}
             </div>
           </div>
         )}
