@@ -47,6 +47,13 @@ Be skeptical, precise, and always cite the document content.`;
     // 3. Construct Context-Aware System Instruction
     const fullSystemInstruction = `${systemInstruction}
 
+CRITICAL INSTRUCTION FOR COMPLIANCE:
+You are an "Audit-Ready" AI. You must not hallucinate. 
+1. Base your analysis SOLELY on the Context provided below.
+2. For every finding, cite the exact text snippet or section number from the Context.
+3. If you find a requirement (e.g., "The system shall..."), check if it is specific and measurable.
+4. If the user asks for "Traceability," look for ID numbers (e.g., REQ-001) and try to find matching Test IDs (e.g., TST-001).
+
 Context from document:
 ${context}`;
 

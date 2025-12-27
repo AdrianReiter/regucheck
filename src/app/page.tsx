@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import FileUpload from '@/components/FileUpload';
 import ChatInterface, { Message } from '@/components/ChatInterface';
 import AgentDashboard from '@/components/AgentDashboard';
-import { ShieldCheck, Settings } from 'lucide-react';
+import { ShieldCheck, Settings, AlertCircle } from 'lucide-react';
 import { STANDARDS } from '@/lib/standards';
 import { cn } from '@/lib/utils';
 
@@ -15,9 +15,11 @@ export default function Home() {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [selectedStandard, setSelectedStandard] = useState(STANDARDS[0].id);
   const [activeTab, setActiveTab] = useState<'chat' | 'agents'>('chat');
+  const [quotaError, setQuotaError] = useState(false);
 
   const generateSummary = async (fileName: string) => {
     setIsLoading(true);
+    setQuotaError(false);
     const standardName = STANDARDS.find(s => s.id === selectedStandard)?.name || 'Unknown Standard';
     const summaryPrompt = `Please analyze the uploaded document (${fileName}) against ${standardName}. 
 Provide a comprehensive structured summary in Markdown format.
@@ -48,9 +50,14 @@ Include:
         }),
       });
 
-      if (!response.ok) throw new Error('Summary generation failed');
-
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429 || data.error?.includes('quota')) {
+          setQuotaError(true);
+        }
+        throw new Error(data.error || 'Summary generation failed');
+      }
       
       setMessages((prev) => [
         ...prev,
@@ -62,11 +69,14 @@ Include:
       ]);
     } catch (error) {
       console.error(error);
+      const isQuota = (error as Error).message.toLowerCase().includes('quota');
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: "I'm sorry, I couldn't generate a summary at this time. Please ask me anything about the document.",
+          content: isQuota 
+            ? "⚠️ **Quota Limit Reached:** This demo has reached its free-tier usage limit for the Gemini AI. Please try again later or tomorrow."
+            : "I'm sorry, I couldn't generate a summary at this time. Please ask me anything about the document.",
           timestamp: new Date(),
         }
       ]);
@@ -95,6 +105,7 @@ Include:
   };
 
   const handleSendMessage = async (content: string) => {
+    setQuotaError(false);
     const newMessage: Message = {
       role: 'user',
       content,
@@ -116,9 +127,14 @@ Include:
         }),
       });
 
-      if (!response.ok) throw new Error('Chat failed');
-
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429 || data.error?.includes('quota')) {
+          setQuotaError(true);
+        }
+        throw new Error(data.error || 'Chat failed');
+      }
       
       setMessages((prev) => [
         ...prev,
@@ -130,6 +146,17 @@ Include:
       ]);
     } catch (error) {
       console.error(error);
+      const isQuota = (error as Error).message.toLowerCase().includes('quota');
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: isQuota 
+            ? "⚠️ **Quota Limit Reached:** The Gemini AI free-tier limit has been reached. Please try again later."
+            : "I'm sorry, there was an error processing your request.",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +164,7 @@ Include:
 
   const handleRunAgent = async (agentId: string) => {
     setIsLoading(true);
+    setQuotaError(false);
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -148,9 +176,26 @@ Include:
         })
       });
       const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 429 || data.error?.includes('quota')) {
+          setQuotaError(true);
+        }
+        throw new Error(data.error || 'Agent execution failed');
+      }
       return data.reply; 
     } catch (error) {
       console.error(error);
+      return JSON.stringify({
+        findings: [{
+          id: "ERROR",
+          severity: "High",
+          title: "Execution Error",
+          description: (error as Error).message.includes('quota') 
+            ? "Free-tier quota exceeded for Gemini AI." 
+            : "There was an error running the agent.",
+          recommendation: "Please try again later."
+        }]
+      });
     } finally {
       setIsLoading(false);
     }
@@ -158,6 +203,21 @@ Include:
 
   return (
     <main className="min-h-screen bg-gray-50 pb-12">
+      {/* Demo Banner */}
+      <div className="bg-blue-600 text-white py-2 px-4 text-center text-sm font-medium">
+        This is a Demo Application. Note: Gemini AI Free Tier usage is limited to 20 requests per day.
+      </div>
+      
+      {quotaError && (
+        <div className="bg-amber-50 border-b border-amber-200 p-4">
+          <div className="max-w-7xl mx-auto flex items-center text-amber-800">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <p className="text-sm font-medium">
+              Quota Limit Reached: The free tier of Gemini AI has been exceeded due to popularity. Please try again tomorrow.
+            </p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <nav className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // @ts-ignore
 import pdf from 'pdf-parse/lib/pdf-parse.js';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
-import { setVectorStore } from '@/lib/vectorStore';
+import { addDocumentsToStore } from '@/lib/vectorStore';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,25 +23,26 @@ export async function POST(req: NextRequest) {
     const data = await pdf(buffer);
     const text = data.text;
 
-    // 2. Chunk Text
+    // 2. Chunk Text with Metadata
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
     
-    const docs = await splitter.createDocuments([text], [{ source: file.name, standard }]);
+    // We explicitly tag the source so the AI knows which file is which
+    const docs = await splitter.createDocuments(
+        [text], 
+        [{ source: file.name, standard, uploadTime: new Date().toISOString() }]
+    );
 
-    // 3. Embed and Store
-    // Ensure you have GOOGLE_API_KEY in your .env.local
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: process.env.GOOGLE_API_KEY,
-      model: "text-embedding-004",
+    // 3. Embed and Append to Store
+    await addDocumentsToStore(docs);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Document processed and added to context.',
+      fileName: file.name 
     });
-
-    const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
-    setVectorStore(store);
-
-    return NextResponse.json({ success: true, message: 'Document processed successfully' });
   } catch (error: any) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
