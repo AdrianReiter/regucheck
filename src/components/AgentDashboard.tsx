@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AGENTS } from '@/lib/agents';
+import { AGENTS, Finding, AgentResponse, Agent } from '@/lib/agents';
 import { 
   Play, 
   AlertTriangle, 
@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface AgentDashboardProps {
-  onRunAgent: (agentId: string) => Promise<any>;
+  onRunAgent: (agentId: string) => Promise<string | AgentResponse>;
   isLoading: boolean;
 }
 
@@ -26,7 +26,7 @@ interface AuditLogEntry {
   agentName: string;
   status: 'Pass' | 'Fail' | 'Error';
   details: string;
-  findings?: any[];
+  findings?: Finding[];
 }
 
 interface FixResult {
@@ -35,7 +35,7 @@ interface FixResult {
 }
 
 export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboardProps) {
-  const [activeResults, setActiveResults] = useState<any>(null);
+  const [activeResults, setActiveResults] = useState<AgentResponse | null>(null);
   const [runningAgentId, setRunningAgentId] = useState<string | null>(null);
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([]);
   
@@ -43,7 +43,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
   const [fixingId, setFixingId] = useState<string | null>(null);
   const [fixes, setFixes] = useState<Record<string, FixResult>>({});
 
-  const handleRun = async (agent: any) => {
+  const handleRun = async (agent: Agent) => {
     setRunningAgentId(agent.id);
     const runId = Math.random().toString(36).substr(2, 9).toUpperCase();
     const timestamp = new Date().toISOString();
@@ -99,7 +99,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
     }
   };
 
-  const handleAutoFix = async (finding: any) => {
+  const handleAutoFix = async (finding: Finding) => {
     const id = finding.id || 'unknown';
     setFixingId(id);
     
@@ -188,7 +188,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
 
               {activeResults.findings && activeResults.findings.length > 0 ? (
                 <div className="space-y-3">
-                  {activeResults.findings.map((item: any, idx: number) => {
+                  {activeResults.findings.map((item: Finding, idx: number) => {
                     const id = item.id || `ISSUE-${idx+1}`;
                     const hasFix = !!fixes[id];
                     const isFixing = fixingId === id;
