@@ -53,7 +53,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
       const result = await onRunAgent(agent.id);
       
       // Parse result if it's a string, otherwise use as is
-      let parsed;
+      let parsed: AgentResponse;
       if (typeof result === 'string') {
         const cleaned = result.replace(/```json\n?|\n?```/g, '').trim();
         parsed = JSON.parse(cleaned);
@@ -175,18 +175,18 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
             <div className="bg-slate-50 border rounded-xl p-6">
               <div className="flex items-center justify-between mb-4 border-b pb-2">
                 <h3 className="text-lg font-bold text-gray-900">Analysis Findings</h3>
-                {activeResults.findings?.length === 0 ? (
+                {activeResults?.findings?.length === 0 ? (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     <CheckCircle2 className="w-3 h-3 mr-1" /> Clean
                   </span>
                 ) : (
                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                    <AlertTriangle className="w-3 h-3 mr-1" /> {activeResults.findings?.length} Issues
+                    <AlertTriangle className="w-3 h-3 mr-1" /> {activeResults?.findings?.length} Issues
                   </span>
                 )}
               </div>
 
-              {activeResults.findings && activeResults.findings.length > 0 ? (
+              {activeResults?.findings && activeResults.findings.length > 0 ? (
                 <div className="space-y-3">
                   {activeResults.findings.map((item: Finding, idx: number) => {
                     const id = item.id || `ISSUE-${idx+1}`;
