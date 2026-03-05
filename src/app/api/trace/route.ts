@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     const verified = data.items.filter((i: TraceItem) => i.status === 'Verified').length;
     
     const result = {
-      items: data.items,
+      items: data.items || [],
       stats: {
         total,
         verified,
