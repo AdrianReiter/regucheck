@@ -70,14 +70,24 @@ export async function POST(req: NextRequest) {
     
     // Clean and Parse
     const cleaned = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-    const data = JSON.parse(cleaned);
+
+    let data;
+    try {
+      data = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error('Failed to parse model response as JSON:', parseError);
+      return NextResponse.json(
+        { error: 'Failed to process traceability data. Please try again.' },
+        { status: 500 }
+      );
+    }
 
     // Calculate Stats
-    const total = data.items.length;
-    const verified = data.items.filter((i: any) => i.status === 'Verified').length;
+    const total = data.items?.length || 0;
+    const verified = (data.items || []).filter((i: any) => i.status === 'Verified').length;
     
     const result = {
-      items: data.items,
+      items: data.items || [],
       stats: {
         total,
         verified,

@@ -1,18 +1,32 @@
 import { 
-  FileSearch, 
+  FileSearch,
   ShieldAlert, 
   GitPullRequest, 
   Copy, 
   Activity, 
   MessageSquareWarning,
-  ScanSearch
+  ScanSearch,
+  LucideIcon,
+  AlertTriangle
 } from 'lucide-react';
+
+export interface Finding {
+  id: string;
+  severity: string;
+  title: string;
+  description: string;
+  recommendation: string;
+}
+
+export interface AgentResponse {
+  findings: Finding[];
+}
 
 export interface Agent {
   id: string;
   name: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
   systemPrompt: string;
 }
 
@@ -98,3 +112,7 @@ export const AGENTS: Agent[] = [
     Return findings in JSON format: { "findings": [{ "id": "CMP-01", "severity": "High", "title": "Adverse Event Signal", "description": "...", "recommendation": "..." }] }`
   }
 ];
+
+export const AGENTS_MAP: Record<string, Agent> = Object.fromEntries(
+  AGENTS.map((a) => [a.id, a])
+);
