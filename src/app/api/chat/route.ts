@@ -85,7 +85,6 @@ ${context}`;
     ];
 
     // 6. Generate Response
-    console.log(`Invoking Gemini model via @langchain/google-genai (AgentMode: ${isAgentMode})...`);
     
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-3-flash-preview',
