@@ -8,7 +8,7 @@ import { ChatMessage } from '@langchain/core/messages';
 export const dynamic = 'force-dynamic';
 
 interface InputMessage {
-  role?: string;
+  role?: 'user' | 'assistant' | 'model';
   content?: string;
 }
 
