@@ -1,18 +1,30 @@
 import { 
-  FileSearch, 
   ShieldAlert, 
   GitPullRequest, 
   Copy, 
   Activity, 
   MessageSquareWarning,
-  ScanSearch
+  ScanSearch,
+  LucideIcon
 } from 'lucide-react';
+
+export interface Finding {
+  id: string;
+  severity: 'Low' | 'Medium' | 'High' | 'Critical';
+  title: string;
+  description: string;
+  recommendation: string;
+}
+
+export interface AgentResponse {
+  findings: Finding[];
+}
 
 export interface Agent {
   id: string;
   name: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
   systemPrompt: string;
 }
 
