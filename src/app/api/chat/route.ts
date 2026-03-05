@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const isAgentMode = !!agentId;
 
     if (isAgentMode) {
-      const agent = AGENTS_RECORD[agentId];
+      const agent = Object.prototype.hasOwnProperty.call(AGENTS_RECORD, agentId) ? AGENTS_RECORD[agentId] : undefined;
       if (!agent) {
         return NextResponse.json({ error: 'Invalid Agent ID' }, { status: 400 });
       }
