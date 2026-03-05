@@ -18,6 +18,8 @@ import { cn } from '@/lib/utils';
 
 import { TraceMatrixData } from '@/lib/traceability';
 
+import { AgentResponse } from '@/lib/agents';
+
 
 
 export default function Home() {
@@ -328,7 +330,7 @@ Include:
 
 
 
-  const handleRunAgent = async (agentId: string) => {
+  const handleRunAgent = async (agentId: string): Promise<AgentResponse | string> => {
 
     setIsLoading(true);
 
