@@ -46,3 +46,8 @@ Your goal is to validate technical documentation against IEC 62304 standards, fo
 ${BASE_PROMPT}`,
   },
 ];
+
+export const STANDARDS_MAP: Record<string, Standard> = STANDARDS.reduce((acc, curr) => {
+  acc[curr.id] = curr;
+  return acc;
+}, {} as Record<string, Standard>);
