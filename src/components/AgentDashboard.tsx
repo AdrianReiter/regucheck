@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AGENTS, Agent, AgentResponse, Finding } from '@/lib/agents';
+import { AGENTS, Finding, AgentResponse, Agent } from '@/lib/agents';
 import { 
   Play, 
   AlertTriangle, 
@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface AgentDashboardProps {
-  onRunAgent: (agentId: string) => Promise<AgentResponse | string>;
+  onRunAgent: (agentId: string) => Promise<string | AgentResponse>;
   isLoading: boolean;
 }
 

@@ -1,0 +1,33 @@
+
+> regucheck@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+✓ Ready in 1467ms
+○ Compiling / ...
+ GET / 200 in 6.9s (compile: 6.5s, render: 468ms)
+ GET / 200 in 80ms (compile: 6ms, render: 74ms)
+ GET / 200 in 67ms (compile: 4ms, render: 63ms)
+○ Compiling /api/upload ...
+Warning: Indexing all PDF objects
+Upload error: InvalidPDFException: Invalid PDF structure
+    at POST (src/app/api/upload/route.ts:23:27)
+  21 |
+  22 |     // 1. Parse PDF
+> 23 |     const data = await pdf(buffer);
+     |                           ^
+  24 |     const text = data.text;
+  25 |
+  26 |     // 2. Chunk Text with Metadata
+(node:3331) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ POST /api/upload 500 in 7.5s (compile: 6.0s, render: 1534ms)

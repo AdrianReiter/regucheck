@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 export interface Finding {
-  id?: string;
+  id: string;
   severity: string;
   title: string;
   description: string;
