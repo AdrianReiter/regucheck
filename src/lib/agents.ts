@@ -112,3 +112,7 @@ export const AGENTS: Agent[] = [
     Return findings in JSON format: { "findings": [{ "id": "CMP-01", "severity": "High", "title": "Adverse Event Signal", "description": "...", "recommendation": "..." }] }`
   }
 ];
+
+export const AGENTS_MAP: Record<string, Agent> = Object.fromEntries(
+  AGENTS.map((a) => [a.id, a])
+);
