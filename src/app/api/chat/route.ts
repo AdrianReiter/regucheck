@@ -38,10 +38,8 @@ Be skeptical, precise, and always cite the document content.`;
     // 2. Retrieve relevant chunks
     // Increase k for Agents to see more context
     const k = isAgentMode ? 15 : 4;
-    console.log(`Searching vector store with k=${k}...`);
     
     const searchResults = await vectorStore.similaritySearch(message || "full document analysis", k);
-    console.log(`Found ${searchResults.length} chunks`);
     const context = searchResults.map(r => r.pageContent).join('\n\n');
 
     // 3. Construct Context-Aware System Instruction
