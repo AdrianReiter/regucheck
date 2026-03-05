@@ -5,6 +5,8 @@ import { STANDARDS, STANDARDS_MAP } from '@/lib/standards';
 import { AGENTS_MAP } from '@/lib/agents';
 import { ChatMessage } from '@langchain/core/messages';
 
+const AGENTS_RECORD = Object.fromEntries(AGENTS.map(a => [a.id, a]));
+
 export const dynamic = 'force-dynamic';
 
 interface InputMessage {
@@ -27,7 +29,7 @@ export async function POST(req: NextRequest) {
     const isAgentMode = !!agentId;
 
     if (isAgentMode) {
-      const agent = AGENTS_MAP[agentId];
+      const agent = Object.prototype.hasOwnProperty.call(AGENTS_RECORD, agentId) ? AGENTS_RECORD[agentId] : undefined;
       if (!agent) {
         return NextResponse.json({ error: 'Invalid Agent ID' }, { status: 400 });
       }
