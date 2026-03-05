@@ -93,7 +93,6 @@ ${context}`;
     } as any);
 
     const response = await model.invoke(finalMessages);
-    console.log('Gemini response received');
 
     return NextResponse.json({ 
       reply: response.content,
