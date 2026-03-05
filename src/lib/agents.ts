@@ -11,14 +11,14 @@ import {
 
 export interface Finding {
   id?: string;
-  severity?: string;
+  severity: string;
   title: string;
   description: string;
   recommendation: string;
 }
 
 export interface AgentResponse {
-  findings?: Finding[];
+  findings: Finding[];
 }
 
 export interface Agent {
