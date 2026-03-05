@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { getVectorStore } from '@/lib/vectorStore';
-import { STANDARDS } from '@/lib/standards';
-import { AGENTS } from '@/lib/agents';
+import { STANDARDS, STANDARDS_MAP } from '@/lib/standards';
+import { AGENTS_MAP } from '@/lib/agents';
 import { ChatMessage } from '@langchain/core/messages';
 
 export const dynamic = 'force-dynamic';
+
+interface InputMessage {
+  role?: 'user' | 'assistant' | 'model';
+  content?: string;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,13 +28,13 @@ export async function POST(req: NextRequest) {
     const isAgentMode = !!agentId;
 
     if (isAgentMode) {
-      const agent = AGENTS.find(a => a.id === agentId);
+      const agent = AGENTS_MAP[agentId];
       if (!agent) {
         return NextResponse.json({ error: 'Invalid Agent ID' }, { status: 400 });
       }
       systemInstruction = agent.systemPrompt;
     } else {
-      const standard = STANDARDS.find(s => s.id === standardId) || STANDARDS[0];
+      const standard = STANDARDS_MAP[standardId] || STANDARDS[0];
       systemInstruction = `${standard.systemPrompt}
 You are verifying technical documentation against the ${standard.name} standard.
 Be skeptical, precise, and always cite the document content.`;
@@ -38,10 +43,8 @@ Be skeptical, precise, and always cite the document content.`;
     // 2. Retrieve relevant chunks
     // Increase k for Agents to see more context
     const k = isAgentMode ? 15 : 4;
-    console.log(`Searching vector store with k=${k}...`);
     
     const searchResults = await vectorStore.similaritySearch(message || "full document analysis", k);
-    console.log(`Found ${searchResults.length} chunks`);
     const context = searchResults.map(r => r.pageContent).join('\n\n');
 
     // 3. Construct Context-Aware System Instruction
@@ -60,7 +63,7 @@ ${context}`;
     // 4. Map History to ChatMessage (Only for Chat Mode)
     const historyMessages: ChatMessage[] = [];
     if (!isAgentMode && Array.isArray(history)) {
-      history.slice(-5).forEach((msg: any) => {
+      history.slice(-5).forEach((msg: InputMessage) => {
         if (!msg || !msg.content) return; 
         
         if (msg.role === 'user') {
@@ -85,24 +88,23 @@ ${context}`;
     ];
 
     // 6. Generate Response
-    console.log(`Invoking Gemini model via @langchain/google-genai (AgentMode: ${isAgentMode})...`);
     
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-3-flash-preview',
       temperature: isAgentMode ? 0.1 : 0, // Lower temp for structured agent tasks
       apiKey: process.env.GOOGLE_API_KEY,
       generationConfig: isAgentMode ? { responseMimeType: "application/json" } : undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     const response = await model.invoke(finalMessages);
-    console.log('Gemini response received');
 
     return NextResponse.json({ 
       reply: response.content,
       isAgentResponse: isAgentMode 
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Chat error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }

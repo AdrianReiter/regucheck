@@ -3,6 +3,19 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { getVectorStore } from '@/lib/vectorStore';
 import { ChatMessage } from '@langchain/core/messages';
 
+export interface TraceItem {
+  id: string;
+  content: string;
+  source: string;
+  coveredBy: string[];
+  status: 'Verified' | 'Unverified';
+  testStatus?: string;
+}
+
+export interface TraceMatrixData {
+  items: TraceItem[];
+}
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -70,14 +83,14 @@ export async function POST(req: NextRequest) {
     
     // Clean and Parse
     const cleaned = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-    const data = JSON.parse(cleaned);
+    const data = JSON.parse(cleaned) as TraceMatrixData;
 
     // Calculate Stats
     const total = data.items.length;
-    const verified = data.items.filter((i: any) => i.status === 'Verified').length;
+    const verified = data.items.filter((i: TraceItem) => i.status === 'Verified').length;
     
     const result = {
-      items: data.items,
+      items: data.items || [],
       stats: {
         total,
         verified,
