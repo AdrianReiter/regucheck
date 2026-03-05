@@ -15,6 +15,7 @@ interface InputMessage {
 export async function POST(req: NextRequest) {
   try {
     const { message, history, standard: standardId, agentId } = await req.json();
+    console.log('Received request:', { agentId });
 
     const vectorStore = getVectorStore();
     if (!vectorStore) {
