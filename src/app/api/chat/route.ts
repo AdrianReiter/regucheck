@@ -5,6 +5,8 @@ import { STANDARDS } from '@/lib/standards';
 import { AGENTS } from '@/lib/agents';
 import { ChatMessage } from '@langchain/core/messages';
 
+const AGENTS_RECORD = Object.fromEntries(AGENTS.map(a => [a.id, a]));
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
     const isAgentMode = !!agentId;
 
     if (isAgentMode) {
-      const agent = AGENTS.find(a => a.id === agentId);
+      const agent = AGENTS_RECORD[agentId];
       if (!agent) {
         return NextResponse.json({ error: 'Invalid Agent ID' }, { status: 400 });
       }
