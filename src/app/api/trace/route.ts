@@ -3,6 +3,19 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { getVectorStore } from '@/lib/vectorStore';
 import { ChatMessage } from '@langchain/core/messages';
 
+export interface TraceItem {
+  id: string;
+  content: string;
+  source: string;
+  coveredBy: string[];
+  status: 'Verified' | 'Unverified';
+  testStatus?: string;
+}
+
+export interface TraceMatrixData {
+  items: TraceItem[];
+}
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -70,21 +83,11 @@ export async function POST(req: NextRequest) {
     
     // Clean and Parse
     const cleaned = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-
-    let data;
-    try {
-      data = JSON.parse(cleaned);
-    } catch (parseError) {
-      console.error('Failed to parse model response as JSON:', parseError);
-      return NextResponse.json(
-        { error: 'Failed to process traceability data. Please try again.' },
-        { status: 500 }
-      );
-    }
+    const data = JSON.parse(cleaned) as TraceMatrixData;
 
     // Calculate Stats
-    const total = data.items?.length || 0;
-    const verified = (data.items || []).filter((i: any) => i.status === 'Verified').length;
+    const total = data.items.length;
+    const verified = data.items.filter((i: TraceItem) => i.status === 'Verified').length;
     
     const result = {
       items: data.items || [],
