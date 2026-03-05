@@ -15,7 +15,6 @@ interface InputMessage {
 export async function POST(req: NextRequest) {
   try {
     const { message, history, standard: standardId, agentId } = await req.json();
-    console.log('Received request:', { message, agentId });
 
     const vectorStore = getVectorStore();
     if (!vectorStore) {
@@ -43,10 +42,8 @@ Be skeptical, precise, and always cite the document content.`;
     // 2. Retrieve relevant chunks
     // Increase k for Agents to see more context
     const k = isAgentMode ? 15 : 4;
-    console.log(`Searching vector store with k=${k}...`);
     
     const searchResults = await vectorStore.similaritySearch(message || "full document analysis", k);
-    console.log(`Found ${searchResults.length} chunks`);
     const context = searchResults.map(r => r.pageContent).join('\n\n');
 
     // 3. Construct Context-Aware System Instruction
@@ -97,17 +94,17 @@ ${context}`;
       temperature: isAgentMode ? 0.1 : 0, // Lower temp for structured agent tasks
       apiKey: process.env.GOOGLE_API_KEY,
       generationConfig: isAgentMode ? { responseMimeType: "application/json" } : undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     const response = await model.invoke(finalMessages);
-    console.log('Gemini response received');
 
     return NextResponse.json({ 
       reply: response.content,
       isAgentResponse: isAgentMode 
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Chat error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }

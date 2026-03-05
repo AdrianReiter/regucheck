@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AGENTS, type Agent, type Finding, type AgentResponse } from '@/lib/agents';
+import { AGENTS, Agent, AgentResponse, Finding } from '@/lib/agents';
 import { 
   Play, 
   AlertTriangle, 
