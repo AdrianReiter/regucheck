@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { getVectorStore } from '@/lib/vectorStore';
-import { STANDARDS } from '@/lib/standards';
-import { AGENTS } from '@/lib/agents';
+import { STANDARDS, STANDARDS_MAP } from '@/lib/standards';
+import { AGENTS_MAP } from '@/lib/agents';
 import { ChatMessage } from '@langchain/core/messages';
 
 const AGENTS_RECORD = Object.fromEntries(AGENTS.map(a => [a.id, a]));
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       }
       systemInstruction = agent.systemPrompt;
     } else {
-      const standard = STANDARDS.find(s => s.id === standardId) || STANDARDS[0];
+      const standard = STANDARDS_MAP[standardId] || STANDARDS[0];
       systemInstruction = `${standard.systemPrompt}
 You are verifying technical documentation against the ${standard.name} standard.
 Be skeptical, precise, and always cite the document content.`;
