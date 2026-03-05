@@ -46,18 +46,30 @@ export async function POST(req: NextRequest) {
       temperature: 0.1,
       apiKey: process.env.GOOGLE_API_KEY,
       generationConfig: { responseMimeType: "application/json" },
-    } as any);
+    });
 
     const response = await model.invoke(finalMessages);
     const textResponse = response.content as string;
     
     const cleaned = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-    const data = JSON.parse(cleaned);
+
+    let data;
+    try {
+      data = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error('Failed to parse AI response as JSON:', parseError);
+      console.error('Raw response:', textResponse);
+      return NextResponse.json(
+        { error: 'Failed to parse the response from the AI model.' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(data);
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Auto-Fix error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
