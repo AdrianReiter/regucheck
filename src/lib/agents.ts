@@ -6,20 +6,19 @@ import {
   Activity, 
   MessageSquareWarning,
   ScanSearch,
-  LucideIcon,
-  AlertTriangle
+  LucideIcon
 } from 'lucide-react';
 
 export interface Finding {
-  id: string;
-  severity: string;
+  id?: string;
+  severity?: string;
   title: string;
   description: string;
   recommendation: string;
 }
 
 export interface AgentResponse {
-  findings: Finding[];
+  findings?: Finding[];
 }
 
 export interface Agent {
