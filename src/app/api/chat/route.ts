@@ -7,6 +7,11 @@ import { ChatMessage } from '@langchain/core/messages';
 
 export const dynamic = 'force-dynamic';
 
+interface InputMessage {
+  role?: string;
+  content?: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { message, history, standard: standardId, agentId } = await req.json();
@@ -60,7 +65,7 @@ ${context}`;
     // 4. Map History to ChatMessage (Only for Chat Mode)
     const historyMessages: ChatMessage[] = [];
     if (!isAgentMode && Array.isArray(history)) {
-      history.slice(-5).forEach((msg: any) => {
+      history.slice(-5).forEach((msg: InputMessage) => {
         if (!msg || !msg.content) return; 
         
         if (msg.role === 'user') {
