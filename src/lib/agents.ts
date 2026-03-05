@@ -5,32 +5,19 @@ import {
   Copy, 
   Activity, 
   MessageSquareWarning,
-  ScanSearch,
-  LucideIcon,
-  AlertTriangle
+  ScanSearch
 } from 'lucide-react';
-
-export interface Finding {
-  id: string;
-  severity: string;
-  title: string;
-  description: string;
-  recommendation: string;
-}
-
-export interface AgentResponse {
-  findings: Finding[];
-}
 
 export interface Agent {
   id: string;
   name: string;
   description: string;
-  icon: LucideIcon;
+  icon: any;
   systemPrompt: string;
 }
 
 export const AGENTS: Agent[] = [
+
   {
     id: 'conflict_agent',
     name: 'Requirement Conflict Agent',
@@ -113,6 +100,4 @@ export const AGENTS: Agent[] = [
   }
 ];
 
-export const AGENTS_MAP: Record<string, Agent> = Object.fromEntries(
-  AGENTS.map((a) => [a.id, a])
-);
+export const AGENTS_MAP = Object.fromEntries(AGENTS.map(a => [a.id, a]));

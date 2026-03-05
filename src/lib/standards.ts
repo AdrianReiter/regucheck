@@ -46,7 +46,3 @@ Your goal is to validate technical documentation against IEC 62304 standards, fo
 ${BASE_PROMPT}`,
   },
 ];
-
-export const STANDARDS_MAP: Record<string, Standard> = Object.fromEntries(
-  STANDARDS.map((s) => [s.id, s])
-);

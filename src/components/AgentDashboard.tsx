@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AGENTS, type Agent, type Finding, type AgentResponse } from '@/lib/agents';
+import { AGENTS } from '@/lib/agents';
 import { 
   Play, 
   AlertTriangle, 
@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface AgentDashboardProps {
-  onRunAgent: (agentId: string) => Promise<AgentResponse | string>;
+  onRunAgent: (agentId: string) => Promise<any>;
   isLoading: boolean;
 }
 
@@ -26,7 +26,7 @@ interface AuditLogEntry {
   agentName: string;
   status: 'Pass' | 'Fail' | 'Error';
   details: string;
-  findings?: Finding[];
+  findings?: any[];
 }
 
 interface FixResult {
@@ -35,7 +35,7 @@ interface FixResult {
 }
 
 export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboardProps) {
-  const [activeResults, setActiveResults] = useState<AgentResponse | null>(null);
+  const [activeResults, setActiveResults] = useState<any>(null);
   const [runningAgentId, setRunningAgentId] = useState<string | null>(null);
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([]);
   
@@ -43,7 +43,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
   const [fixingId, setFixingId] = useState<string | null>(null);
   const [fixes, setFixes] = useState<Record<string, FixResult>>({});
 
-  const handleRun = async (agent: Agent) => {
+  const handleRun = async (agent: any) => {
     setRunningAgentId(agent.id);
     const runId = Math.random().toString(36).substr(2, 9).toUpperCase();
     const timestamp = new Date().toISOString();
@@ -53,7 +53,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
       const result = await onRunAgent(agent.id);
       
       // Parse result if it's a string, otherwise use as is
-      let parsed: AgentResponse;
+      let parsed;
       if (typeof result === 'string') {
         const cleaned = result.replace(/```json\n?|\n?```/g, '').trim();
         parsed = JSON.parse(cleaned);
@@ -99,7 +99,7 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
     }
   };
 
-  const handleAutoFix = async (finding: Finding) => {
+  const handleAutoFix = async (finding: any) => {
     const id = finding.id || 'unknown';
     setFixingId(id);
     
@@ -175,20 +175,20 @@ export default function AgentDashboard({ onRunAgent, isLoading }: AgentDashboard
             <div className="bg-slate-50 border rounded-xl p-6">
               <div className="flex items-center justify-between mb-4 border-b pb-2">
                 <h3 className="text-lg font-bold text-gray-900">Analysis Findings</h3>
-                {activeResults?.findings?.length === 0 ? (
+                {activeResults.findings?.length === 0 ? (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     <CheckCircle2 className="w-3 h-3 mr-1" /> Clean
                   </span>
                 ) : (
                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                    <AlertTriangle className="w-3 h-3 mr-1" /> {activeResults?.findings?.length} Issues
+                    <AlertTriangle className="w-3 h-3 mr-1" /> {activeResults.findings?.length} Issues
                   </span>
                 )}
               </div>
 
-              {activeResults?.findings && activeResults.findings.length > 0 ? (
+              {activeResults.findings && activeResults.findings.length > 0 ? (
                 <div className="space-y-3">
-                  {activeResults.findings.map((item: Finding, idx: number) => {
+                  {activeResults.findings.map((item: any, idx: number) => {
                     const id = item.id || `ISSUE-${idx+1}`;
                     const hasFix = !!fixes[id];
                     const isFixing = fixingId === id;

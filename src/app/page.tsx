@@ -12,13 +12,11 @@ import TraceabilityMatrix from '@/components/TraceabilityMatrix';
 
 import { ShieldCheck, Settings, AlertCircle } from 'lucide-react';
 
-import { STANDARDS, STANDARDS_MAP } from '@/lib/standards';
+import { STANDARDS } from '@/lib/standards';
 
 import { cn } from '@/lib/utils';
 
 import { TraceMatrixData } from '@/lib/traceability';
-
-import { AgentResponse } from '@/lib/agents';
 
 
 
@@ -46,7 +44,7 @@ export default function Home() {
 
     setQuotaError(false);
 
-    const standardName = STANDARDS_MAP[selectedStandard]?.name || 'Unknown Standard';
+    const standardName = STANDARDS.find(s => s.id === selectedStandard)?.name || 'Unknown Standard';
 
     const summaryPrompt = `Please analyze the uploaded document (${fileName}) against ${standardName}. 
 
@@ -330,7 +328,7 @@ Include:
 
 
 
-  const handleRunAgent = async (agentId: string): Promise<AgentResponse | string> => {
+  const handleRunAgent = async (agentId: string) => {
 
     setIsLoading(true);
 
@@ -596,7 +594,7 @@ Include:
 
                     <span className="font-medium text-blue-600">
 
-                      {STANDARDS_MAP[selectedStandard]?.name}
+                      {STANDARDS.find(s => s.id === selectedStandard)?.name}
 
                     </span>
 
